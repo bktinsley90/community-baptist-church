@@ -31,7 +31,7 @@ function createVercelContext(req: IncomingMessage, res: ServerResponse): TrpcCon
   } as TrpcContext;
 }
 
-export default createHTTPHandler({
+const trpcHandler = createHTTPHandler({
   router: appRouter,
   basePath: "/api/trpc/",
   createContext: async ({ req, res }) => ({
@@ -39,3 +39,16 @@ export default createHTTPHandler({
     user: await getAdminUser(req as unknown as Request),
   }),
 });
+
+export default function handler(req: IncomingMessage, res: ServerResponse) {
+  try {
+    return trpcHandler(req, res);
+  } catch (error) {
+    console.error("[Vercel tRPC] Request failed", error);
+    if (!res.headersSent) {
+      res.statusCode = 500;
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ error: { message: "The server could not process this request." } }));
+    }
+  }
+}
