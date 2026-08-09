@@ -1,0 +1,19 @@
+import dotenv from "dotenv";
+import { defineConfig } from "drizzle-kit";
+
+dotenv.config({ path: ".env.local" });
+dotenv.config();
+
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error("DATABASE_URL is required to run drizzle commands");
+}
+
+export default defineConfig({
+  schema: "./drizzle/schema.ts",
+  out: "./drizzle-sqlite",
+  dialect: "sqlite",
+  dbCredentials: {
+    url: connectionString.replace(/^file:/, ""),
+  },
+});
