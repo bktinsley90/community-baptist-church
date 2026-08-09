@@ -258,8 +258,9 @@ async function listEventsForAdmin() {
 async function createChurchEvent(event) {
   const db = await getDb();
   if (!db) throw unavailableDatabaseError();
-  const result = await db.insert(churchEvents).values(event);
-  return { id: Number(result.lastInsertRowid) };
+  const [result] = await db.insert(churchEvents).values(event).returning({ id: churchEvents.id });
+  if (!result) throw unavailableDatabaseError();
+  return result;
 }
 async function deleteChurchEvent(id) {
   const db = await getDb();
@@ -279,8 +280,9 @@ async function listAnnouncementsForAdmin() {
 async function createAnnouncement(announcement) {
   const db = await getDb();
   if (!db) throw unavailableDatabaseError();
-  const result = await db.insert(announcements).values(announcement);
-  return { id: Number(result.lastInsertRowid) };
+  const [result] = await db.insert(announcements).values(announcement).returning({ id: announcements.id });
+  if (!result) throw unavailableDatabaseError();
+  return result;
 }
 async function deleteAnnouncement(id) {
   const db = await getDb();
@@ -290,8 +292,9 @@ async function deleteAnnouncement(id) {
 async function createContactMessage(message) {
   const db = await getDb();
   if (!db) throw unavailableDatabaseError();
-  const result = await db.insert(contactMessages).values(message);
-  return { id: Number(result.lastInsertRowid) };
+  const [result] = await db.insert(contactMessages).values(message).returning({ id: contactMessages.id });
+  if (!result) throw unavailableDatabaseError();
+  return result;
 }
 async function updateContactMessageNotification(id, status, error = null) {
   const db = await getDb();
