@@ -3,9 +3,9 @@ import type { Request, Response } from "express";
 import { serialize } from "cookie";
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { appRouter } from "../../server/routers";
-import { getAdminUser } from "../../server/_core/localAuth";
-import type { TrpcContext } from "../../server/_core/context";
+import { appRouter } from "../../server/routers.ts";
+import { getAdminUser } from "../../server/_core/localAuth.ts";
+import type { TrpcContext } from "../../server/_core/context.ts";
 
 function createVercelContext(req: IncomingMessage, res: ServerResponse): TrpcContext {
   const protocol = req.headers["x-forwarded-proto"]?.toString().split(",")[0].trim() ?? "http";
