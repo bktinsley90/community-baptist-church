@@ -11,9 +11,9 @@ if (!connectionString) {
 
 export default defineConfig({
   schema: "./drizzle/schema.ts",
-  out: "./drizzle-sqlite",
-  dialect: "sqlite",
+  out: "./drizzle",
+  dialect: "postgresql",
   dbCredentials: {
-    url: connectionString.replace(/^file:/, ""),
+    url: connectionString,
   },
 });

@@ -183,51 +183,49 @@ var systemRouter = router({
 
 // server/db.ts
 import { and, asc, desc, eq, gte } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
 // drizzle/schema.ts
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-var users = sqliteTable("users", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  openId: text("openId", { length: 64 }).notNull().unique(),
+import { boolean, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+var users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: text("email"),
   loginMethod: text("loginMethod"),
   role: text("role", { enum: ["user", "admin"] }).default("user").notNull(),
-  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
-  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
-  lastSignedIn: integer("lastSignedIn", { mode: "timestamp_ms" }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull()
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow().notNull(),
+  lastSignedIn: timestamp("lastSignedIn", { withTimezone: true }).defaultNow().notNull()
 });
-var churchEvents = sqliteTable("church_events", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+var churchEvents = pgTable("church_events", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
-  eventStart: integer("eventStart", { mode: "timestamp_ms" }).notNull(),
+  eventStart: timestamp("eventStart", { withTimezone: true }).notNull(),
   description: text("description").notNull(),
-  isPublished: integer("isPublished", { mode: "boolean" }).default(true).notNull(),
-  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
-  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull()
+  isPublished: boolean("isPublished").default(true).notNull(),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow().notNull()
 });
-var announcements = sqliteTable("announcements", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+var announcements = pgTable("announcements", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  publishedAt: integer("publishedAt", { mode: "timestamp_ms" }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
-  isPublished: integer("isPublished", { mode: "boolean" }).default(true).notNull(),
-  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
-  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull()
+  publishedAt: timestamp("publishedAt", { withTimezone: true }).defaultNow().notNull(),
+  isPublished: boolean("isPublished").default(true).notNull(),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow().notNull()
 });
-var contactMessages = sqliteTable("contact_messages", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+var contactMessages = pgTable("contact_messages", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull(),
   subject: text("subject").notNull(),
   message: text("message").notNull(),
   notificationStatus: text("notificationStatus").default("pending").notNull(),
   notificationError: text("notificationError"),
-  receivedAt: integer("receivedAt", { mode: "timestamp_ms" }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull()
+  receivedAt: timestamp("receivedAt", { withTimezone: true }).defaultNow().notNull()
 });
 
 // server/db.ts
@@ -235,10 +233,8 @@ var _db = null;
 async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      const databaseUrl = process.env.DATABASE_URL.replace(/^file:/, "");
-      const databasePath = databaseUrl === ":memory:" ? databaseUrl : path.resolve(databaseUrl);
-      if (databasePath !== ":memory:") fs.mkdirSync(path.dirname(databasePath), { recursive: true });
-      _db = drizzle(new Database(databasePath));
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1, idleTimeoutMillis: 1e4 });
+      _db = drizzle(pool);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -495,11 +491,7 @@ function createVercelContext(req, res) {
     expressResponse.cookie(name, "", { ...options, maxAge: 0 });
     return expressResponse;
   };
-  return {
-    req: expressRequest,
-    res: expressResponse,
-    user: null
-  };
+  return { req: expressRequest, res: expressResponse, user: null };
 }
 var trpcHandler = createHTTPHandler({
   router: appRouter,

@@ -1,8 +1,6 @@
 import { and, asc, desc, eq, gte } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import {
   announcements,
   churchEvents,
@@ -20,10 +18,8 @@ let _db: ReturnType<typeof drizzle> | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      const databaseUrl = process.env.DATABASE_URL.replace(/^file:/, "");
-      const databasePath = databaseUrl === ":memory:" ? databaseUrl : path.resolve(databaseUrl);
-      if (databasePath !== ":memory:") fs.mkdirSync(path.dirname(databasePath), { recursive: true });
-      _db = drizzle(new Database(databasePath));
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1, idleTimeoutMillis: 10_000 });
+      _db = drizzle(pool);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;

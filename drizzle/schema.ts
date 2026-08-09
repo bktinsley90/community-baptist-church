@@ -1,50 +1,50 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { boolean, integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 /** Core user table backing the Manus OAuth flow. */
-export const users = sqliteTable("users", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  openId: text("openId", { length: 64 }).notNull().unique(),
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: text("email"),
   loginMethod: text("loginMethod"),
   role: text("role", { enum: ["user", "admin"] }).default("user").notNull(),
-  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
-  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
-  lastSignedIn: integer("lastSignedIn", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow().notNull(),
+  lastSignedIn: timestamp("lastSignedIn", { withTimezone: true }).defaultNow().notNull(),
 });
 
 /** Public gatherings managed by authenticated church staff. Timestamps are stored in UTC. */
-export const churchEvents = sqliteTable("church_events", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const churchEvents = pgTable("church_events", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
-  eventStart: integer("eventStart", { mode: "timestamp_ms" }).notNull(),
+  eventStart: timestamp("eventStart", { withTimezone: true }).notNull(),
   description: text("description").notNull(),
-  isPublished: integer("isPublished", { mode: "boolean" }).default(true).notNull(),
-  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
-  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+  isPublished: boolean("isPublished").default(true).notNull(),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow().notNull(),
 });
 
 /** Church updates shown in reverse chronological order on the public site. */
-export const announcements = sqliteTable("announcements", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const announcements = pgTable("announcements", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  publishedAt: integer("publishedAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
-  isPublished: integer("isPublished", { mode: "boolean" }).default(true).notNull(),
-  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
-  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+  publishedAt: timestamp("publishedAt", { withTimezone: true }).defaultNow().notNull(),
+  isPublished: boolean("isPublished").default(true).notNull(),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow().notNull(),
 });
 
 /** Messages submitted through the public contact form. */
-export const contactMessages = sqliteTable("contact_messages", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const contactMessages = pgTable("contact_messages", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull(),
   subject: text("subject").notNull(),
   message: text("message").notNull(),
   notificationStatus: text("notificationStatus").default("pending").notNull(),
   notificationError: text("notificationError"),
-  receivedAt: integer("receivedAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+  receivedAt: timestamp("receivedAt", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export type User = typeof users.$inferSelect;
