@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { ArrowRight, CalendarDays, ChevronDown, Mail, Menu, Sparkles, X } from "lucide-react";
+import { ArrowRight, BookOpen, CalendarDays, ChevronDown, Mail, Menu, Sparkles, X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 const logoUrl = "/community-baptist-church-logo.png";
@@ -90,7 +90,7 @@ export default function Home() {
               <h1 id="hero-title">A community strengthened through Christ.</h1>
               <p className="hero-lede">Community Baptist Church is a place to worship, serve, and find belonging as we follow Jesus together.</p>
               <div className="hero-actions">
-                <a className="button button-gold" href="#contact">Plan your visit <ArrowRight size={18} aria-hidden="true" /></a>
+                <a className="button button-gold" href="#join">Join Us Sunday <ArrowRight size={18} aria-hidden="true" /></a>
                 <a className="button button-quiet" href="#about">Discover our heart <ChevronDown size={18} aria-hidden="true" /></a>
               </div>
             </div>
@@ -99,6 +99,17 @@ export default function Home() {
               <p className="scripture-reference">Philippians 4:13</p>
               <blockquote>“I can do all things through Christ who strengthens me.”</blockquote>
             </aside>
+          </div>
+        </section>
+
+        <section id="join" className="join-section section" aria-labelledby="join-title">
+          <div className="site-shell join-content">
+            <div className="section-heading join-heading reveal"><p className="eyebrow eyebrow-purple">Gather with us</p><h2 id="join-title">Join us This Week</h2></div>
+            <div className="schedule-grid reveal">
+              <article className="schedule-card"><CalendarDays size={24} aria-hidden="true" /><div><h3>Sunday Worship</h3><p>9:00am</p></div></article>
+              <article className="schedule-card"><BookOpen size={24} aria-hidden="true" /><div><h3>Bible Study</h3><p>Wednesday 7:00pm</p></div></article>
+            </div>
+            <address className="church-address reveal">297 Fuller Road<br />Spartanburg, SC 29302</address>
           </div>
         </section>
 
@@ -159,7 +170,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="site-footer"><div className="site-shell footer-inner"><a className="brand-lockup" href="#top" aria-label="Back to top"><img src={logoUrl} alt="" className="brand-logo" /><span><strong>Community</strong><small>Baptist Church</small></span></a><p>© {new Date().getFullYear()} Community Baptist Church. A place to worship, belong, and grow.</p><a className="staff-link" href="/admin">Staff content manager</a></div></footer>
+      <footer className="site-footer"><div className="site-shell footer-inner"><a className="brand-lockup" href="#top" aria-label="Back to top"><img src={logoUrl} alt="" className="brand-logo" /><span><strong>Community</strong><small>Baptist Church</small></span></a><p>© 2025 Community Baptist Church. All rights reserved.<br />“I can do all things through Christ who strengthens me.” - Philippians 4:13</p><a className="staff-link" href="/admin">Staff content manager</a></div></footer>
     </div>
   );
 }
